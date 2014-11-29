@@ -37,7 +37,7 @@ Dynamixel Dxl(DXL_BUS_SERIAL1); //create dynamixel instance
 // conversion motorposition to motorangle and offsets
 const float ticksPerRad = 4096/(2*PI);
 const float theta1Offset_left = 126*PI/180;
-const float theta2Offset_left = 0.5*20*PI/180;
+const float theta2Offset_left = 0.4*20*PI/180;
 
 //physical goal dimension/position [m]
 const float goal_leftY = 0.457;
@@ -235,7 +235,7 @@ twotuple nextWaypointTheta_left, nextWaypointTheta_right;
 twotuple nextWaypointYZ_left, nextWaypointYZ_right;
 fourtuple currpos;
 int encPosition1, encPosition2;
-int speed = 30; //max: 1023
+int speed = 50; //max: 1023
 
 void loop() //this runs repeatedly during operation
 {
@@ -273,10 +273,9 @@ void loop() //this runs repeatedly during operation
   /* Command the robot */
   //choose correct waypoint
   
-  int waypointNumber = 0;
-  int i;
+
   /*
-  for(i=0; i<noOfWaypoints; i++) //could do with search function
+  for(int i=0; i<noOfWaypoints; i++) //could do with search function
   {
     if (trajectory[i].t > millis()) //found next waypoint
       waypointNumber = i;
@@ -288,7 +287,7 @@ void loop() //this runs repeatedly during operation
     waypointNumber = noOfWaypoints-1; //choose last one
   */
   
-  waypointNumber = 12;
+  int waypointNumber = 12;
   
   nextWaypointYZ_left.first = trajectory[waypointNumber].yleft;
   nextWaypointYZ_left.second = trajectory[waypointNumber].zleft;
@@ -299,6 +298,9 @@ void loop() //this runs repeatedly during operation
   
   encPosition1 = (int) floor((nextWaypointTheta_left.first+theta1Offset_left)*ticksPerRad);
   encPosition2 = (int) floor((nextWaypointTheta_left.second+theta2Offset_left)*ticksPerRad);
+  
+  encPosition1 = (int) floor(t_goal*ticksPerRad);
+  encPosition2 = (int) floor(y_goal*ticksPerRad);
   
   /*SerialUSB.println("encoder position");
   SerialUSB.println(encPosition1);
@@ -329,15 +331,18 @@ void loop() //this runs repeatedly during operation
 
   SerialUSB.println(ticksPerRad);
   */
-  
-  currpos = getCurrPosition();
-  
-  SerialUSB.println("Current xy position in loop");
-  SerialUSB.println(currpos.first);
-  SerialUSB.println(currpos.second);
-  SerialUSB.println(currpos.third);
-  SerialUSB.println(currpos.fourth);
-  delay(500);
+   
+//  SerialUSB.println("Current xy position in loop");
+//  SerialUSB.println(currpos.first);
+//  SerialUSB.println(currpos.second);
+//  SerialUSB.println(currpos.third);
+//  SerialUSB.println(currpos.fourth);
+//  delay(500);
+
+ SerialUSB.println("thetas");
+ SerialUSB.println(encPosition1);
+ SerialUSB.println(encPosition2);
+ delay(500);
 
   
   
