@@ -12,6 +12,15 @@ if platform.system() == 'Darwin': # mac os
     bytesize=serial.SEVENBITS,
     timeout=None
     )
+elif platform.system() == 'Windows': # Windows
+	ser = serial.Serial(
+    port='/COM3',
+    baudrate=9600,
+    parity=serial.PARITY_ODD,
+    stopbits=serial.STOPBITS_TWO,
+    bytesize=serial.SEVENBITS,
+    timeout=None
+	)
 else: # linux
     ser = serial.Serial(
         port='/dev/ttyACM0',
