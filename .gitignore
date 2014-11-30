@@ -8,8 +8,8 @@
 *.so
 *.pyc
 *.py~
-*.npy
 *.m~
+*~
  
 # Packages #
 ############
