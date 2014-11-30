@@ -53,10 +53,14 @@ const float baseoffsetZ = 0.4;
 //robot armlength
 const double l = 0.3;
 
+const double angle_threshold = .09;
+
 const float ballRadius = 0.06;
 
 const int noOfWaypoints = 12;
 float t_goal, y_goal, z_goal;
+
+
 fourtuple robotTargets; //TODO: initialize to something for first few loops without data
 trajectoryItem trajectory[noOfWaypoints+1]; //TODO: initialize to something for first few loops without data
 //IMPORTANT: time in the trajectory is in milliseconds!!!
@@ -168,7 +172,7 @@ void generateTrajectory(fourtuple target,float t_goal,float currtime)
   }
 }
 
-struct fourtuple twoTOfourTuple(twotuple one, twotuple two)
+struct fourtuple twoTOfourTuple( twotuple one, twotuple two)
 {
   fourtuple result = {one.first,one.second,two.first,two.second};
   return result;
@@ -202,6 +206,37 @@ struct fourtuple getCurrPosition()
   
   return CurrPosition;
 }
+
+double BoundDouble(double upper, double lower, double num){
+   while(num>=upper){
+    num-=upper;
+  }
+  
+  while(num< lower){
+    num+= lower;
+  }
+  
+  return num;
+}
+
+double FindMinimumDirection(double current, double goal){
+  //scales angle so that motors always take the shortest path
+  goal = BoundDouble(2*PI, 0, goal);
+  //goal is now between 0 and 2pi
+  current = BoundDouble(2*PI, 0, current);
+  //current is now between 0 and 2pi
+  double delta = 0;
+  
+  if (abs(goal-current) > PI){ //too far, go the other way
+   delta = -2*PI + (goal - current);
+  }
+  else{
+   delta = (goal-current);
+  }
+  
+  return delta;
+}
+  
 
 
 void setup() //this runs once after startup or reset
@@ -287,17 +322,22 @@ void loop() //this runs repeatedly during operation
     waypointNumber = noOfWaypoints-1; //choose last one
   */
   
-  int waypointNumber = 12;
+//  int waypointNumber = 12;
+//  
+//  nextWaypointYZ_left.first = trajectory[waypointNumber].yleft;
+//  nextWaypointYZ_left.second = trajectory[waypointNumber].zleft;
+//  nextWaypointYZ_right.first = trajectory[waypointNumber].yright;
+//  nextWaypointYZ_right.second = trajectory[waypointNumber].zright;
+//  
+//  nextWaypointTheta_left = invKinematics(nextWaypointYZ_left);
+//  
+//  encPosition1 = (int) floor((nextWaypointTheta_left.first+theta1Offset_left)*ticksPerRad);
+//  encPosition2 = (int) floor((nextWaypointTheta_left.second+theta2Offset_left)*ticksPerRad);
+//  1,
+  fourtuple CurrPos = getCurrPosition();
+//  double t1 = FindMinimumDirection(CurrPos.first,t_goal*ticksPerRad);
+//  double t2 = FindMinimumDirection(CurrPos.second,y_goal*ticksPerRad);
   
-  nextWaypointYZ_left.first = trajectory[waypointNumber].yleft;
-  nextWaypointYZ_left.second = trajectory[waypointNumber].zleft;
-  nextWaypointYZ_right.first = trajectory[waypointNumber].yright;
-  nextWaypointYZ_right.second = trajectory[waypointNumber].zright;
-  
-  nextWaypointTheta_left = invKinematics(nextWaypointYZ_left);
-  
-  encPosition1 = (int) floor((nextWaypointTheta_left.first+theta1Offset_left)*ticksPerRad);
-  encPosition2 = (int) floor((nextWaypointTheta_left.second+theta2Offset_left)*ticksPerRad);
   
   encPosition1 = (int) floor(t_goal*ticksPerRad);
   encPosition2 = (int) floor(y_goal*ticksPerRad);
@@ -339,10 +379,13 @@ void loop() //this runs repeatedly during operation
 //  SerialUSB.println(currpos.fourth);
 //  delay(500);
 
+
+
+
  SerialUSB.println("thetas");
- SerialUSB.println(encPosition1);
- SerialUSB.println(encPosition2);
- delay(500);
+ SerialUSB.println(Dxl.readWord(ID_106_LEFT, POSITION_ADDRESS));
+ SerialUSB.println(Dxl.readWord(ID_64_LEFT, POSITION_ADDRESS));
+ delay(100);
 
   
   
