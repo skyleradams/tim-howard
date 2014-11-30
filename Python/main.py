@@ -63,16 +63,7 @@ kf = goalieFunctions.initKalman(initstate, initcovariance)
 prev_filtered_state_mean = initstate
 prev_filtered_state_covariance = initcovariance
 
-#testing purposes: make up measurements
 numframes = 500
-Measured = np.ma.zeros((numframes,3))
-noise1 = np.random.normal(0,0.3,numframes)
-noise2 = np.random.normal(0,0.3,numframes)
-Measured[:,0] = 2-np.linspace(-1, 2, num=numframes)+noise1
-Measured[:,1] = np.linspace(-1, 2, num=numframes)+noise2
-Measured[:,2] = np.ma.array(np.zeros(numframes), mask = np.zeros(numframes)) #generate framework to allow masking
-Measured[0:numframes,0:3].mask = False #note: a mask in single component makes whole x,y,z measurement masked
-
 RawCameraData = []
 
 
@@ -120,13 +111,6 @@ while True:
 
 	RawCameraData.append((x1, y1, a1, x2, y2, a2, timestamp))
 	camera_observation = goalieFunctions.cameraTransform( x1, y1, a1, x2, y2, a2) #transfrom to our system
-	#can mask observation at this point if unreliable camera_observation = ma.masked
-	
-	
-	
-	"""uncomment follwing two lines for using makeup measurements"""
-	#camera_observation = Measured[loopcount,:]
-	#deltaT = 1.0/60
 	
 	pxRaw.append(camera_observation[0])
 	pyRaw.append(camera_observation[1])
@@ -255,7 +239,7 @@ ax.set_xlabel('x')
 ax.set_ylabel('y')
 ax.set_zlabel('z')
 #ax.legend(loc=2)
-#TODO: 3d plot aspect ratio, animated plot
+#TODO: animated plot
 
 plt.show()
 #End plotting results
