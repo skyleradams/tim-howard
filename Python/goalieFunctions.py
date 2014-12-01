@@ -29,8 +29,10 @@ def initKalman(initstate, initcovariance):
 	Transition_Matrix, b = transitionMatrices(deltaT_default,initstate)
 	Observation_Matrix=[[1,0,0,0,0,0],[0,1,0,0,0,0],[0,0,1,0,0,0]]
 
-	transistionCov=1e-4*np.eye(6) #how confident are we of our model..how about impact cases
-	observationCov=1.0e-2*np.eye(3) #measure from data, may change according to blob size
+	posCov = 1e-5
+	velCov = 1e-3
+	transistionCov=np.diag([posCov,posCov,posCov,velCov,velCov,velCov]) #how confident are we of our model..how about impact cases. more certain about pos than speed?
+	observationCov=0.5e-2*np.eye(3) #measure from data, may change according to blob size
 	kf=KalmanFilter(transition_matrices=Transition_Matrix,
             observation_matrices=Observation_Matrix,
             initial_state_mean=initstate,

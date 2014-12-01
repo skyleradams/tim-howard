@@ -20,6 +20,7 @@ except socket.error:
     sys.exit(0)
 
 #### Setup USB Connection to OpenCM ####
+
 ser = serial.Serial(
     port='/dev/ttyACM0',
     baudrate=9600,
@@ -49,29 +50,20 @@ timevec = [] #initialize time array
 pxRaw, pxFilt, pyRaw, pyFilt, pzRaw, pzFilt, vxRaw, vxFilt, vyRaw, vyFilt, vzRaw, vzFilt = [], [], [], [], [], [], [], [], [], [], [], [] #initialize arrays to store data
 
 #initialize the kalman filter
-xinit=1.0
-yinit=1.0
+xinit=0
+yinit=0
 zinit=0
 vxinit=0
 vyinit=0
 vzinit=0
 initstate = [xinit,yinit,zinit,vxinit,vyinit,vzinit]
-initcovariance = 1.0e-1*np.eye(6) #initial speed covariance very large, position better known?!
+initcovariance = 5.0e-1*np.eye(6) #initial speed covariance very large, position better known?!
 
 kf = goalieFunctions.initKalman(initstate, initcovariance)
 prev_filtered_state_mean = initstate
 prev_filtered_state_covariance = initcovariance
 
-#testing purposes: make up measurements
-numframes = 1000
-Measured = np.ma.zeros((numframes,3))
-noise1 = np.random.normal(0,0.3,numframes)
-noise2 = np.random.normal(0,0.3,numframes)
-Measured[:,0] = 2-np.linspace(-1, 2, num=numframes)+noise1
-Measured[:,1] = np.linspace(-1, 2, num=numframes)+noise2
-Measured[:,2] = np.ma.array(np.zeros(numframes), mask = np.zeros(numframes)) #generate framework to allow masking
-Measured[0:numframes,0:3].mask = False #note: a mask in single component makes whole x,y,z measurement masked
-
+numframes = 500
 RawCameraData = []
 
 
@@ -99,12 +91,13 @@ tic = time.time()
 loopcount = 0
 loopRuntime = 0
 (x1, y1, a1, x2, y2, a2, timestamp_prev) = goalieFunctions.getVals(s1) #initialzise previous timestamp
-#SavedData=np.load("RawCameraData_RestingBall_5000.npy")
+#SavedData=np.load("RawCameraData_RestingBall_1000.npy")
+#(x1, y1, a1, x2, y2, a2, timestamp_prev) = SavedData[0]
 while True:
 	
 	if loopcount >= numframes:
 		break
-	
+
 	(x1, y1, a1, x2, y2, a2, timestamp) = goalieFunctions.getVals(s1) #grab frame from camera
 	#(x1, y1, a1, x2, y2, a2, timestamp) = SavedData[loopcount]
 
@@ -112,18 +105,12 @@ while True:
 	deltaT = timestamp_current-timestamp_prev
 	timestamp_prev = timestamp_current #update
 
+	
 	if deltaT == 0: #camera gave us old frame that we already have -- discard and try again
 		continue
 
 	RawCameraData.append((x1, y1, a1, x2, y2, a2, timestamp))
 	camera_observation = goalieFunctions.cameraTransform( x1, y1, a1, x2, y2, a2) #transfrom to our system
-	#can mask observation at this point if unreliable camera_observation = ma.masked
-	
-	
-	
-	"""uncomment follwing two lines for using makeup measurements"""
-	#camera_observation = Measured[loopcount,:]
-	#deltaT = 1.0/60
 	
 	pxRaw.append(camera_observation[0])
 	pyRaw.append(camera_observation[1])
@@ -154,6 +141,7 @@ while True:
 		y_goal = predictedState[1]
 		z_goal = predictedState[2]
 
+		
 		#Test if new prediction is sufficiently away from previous. If yes, send to openCM
 		if abs(t_goal-t_goal_prev)>tTol or abs(y_goal-y_goal_prev)>distTol or abs(z_goal-z_goal_prev)>distTol:
 			#now send goal position to robot if OpenCM is ready
@@ -175,7 +163,7 @@ while True:
 					print("Was ready but received " + out)
 			else:
 				print("OpenCM was not ready")
-
+		
 
 
 	#start live plotting:
@@ -201,7 +189,7 @@ print("Time per loop iteration is " + str(toc/loopcount) + " s. Corresponds to "
 s1.close() #disconnect from vision network 
 
 #### Postrun data processing ####
-np.save("RawCameraData", RawCameraData) #save for later processing. Access single camera outputs with RawCameraData=np.load("RawCameraData.npy") (x1, y1, a1, x2, y2, a2, timestamp) = RawCameraData[i]
+#np.save("RawCameraData", RawCameraData) #save for later processing. Access single camera outputs with RawCameraData=np.load("RawCameraData.npy") (x1, y1, a1, x2, y2, a2, timestamp) = RawCameraData[i]
 
 #Start Plotting results
 close(realtime_fig)
@@ -243,6 +231,7 @@ fig3d = plt.figure(5)
 ax = fig3d.add_subplot(111, projection='3d',)
 ax.scatter(pxRaw,pyRaw,pzRaw, c='r', marker='x', label='measured')
 ax.scatter(pxFilt,pyFilt,pzFilt, c='b', marker='o', label='kalman output')
+ax.scatter(0,0,7, c='w', marker='x')
 xx, yy = np.meshgrid(range(0,4,3), range(-3,4,6))
 ax.plot_surface(xx,yy,0, color='lightgreen')
 ax.plot(goalcorners[:,0],goalcorners[:,1],np.squeeze(np.asarray(goalcorners[:,2])), 'k')
@@ -250,7 +239,7 @@ ax.set_xlabel('x')
 ax.set_ylabel('y')
 ax.set_zlabel('z')
 #ax.legend(loc=2)
-#TODO: 3d plot aspect ratio, animated plot
+#TODO: animated plot
 
 plt.show()
 #End plotting results
