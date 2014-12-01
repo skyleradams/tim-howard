@@ -8,6 +8,12 @@ struct twotuple
   double second;
 };
 
+struct twoInts
+{
+  int first;
+  int second;
+};
+
 struct fourtuple
 {
   double first;
@@ -202,6 +208,42 @@ struct fourtuple getCurrPosition()
   
   return CurrPosition;
 }
+
+struct twoInts pickNextWaypoint()
+{
+  /* This function chooses the next waypoint. Returns twoInts nextWaypoint = {nextWaypoint_left, nextWaypoint_right}
+     Idea: Check which waypoint we are closest to and choose the next.
+  */
+  fourtuple CurrPos = getCurrPosition();
+  twoInts nextWaypoint;
+  
+  float distance2_left = 1000; //initialize squared distances to large value
+  float distance2_right = 1000;
+  
+  for (int i=0; i<=noOfWaypoints; i++)
+  {
+    if ( (CurrPos.first-trajectory[i].yleft)*(CurrPos.first-trajectory[i].yleft)+(CurrPos.second-trajectory[i].zleft)*(CurrPos.second-trajectory[i].zleft) < distance2_left ) //check if i th waypoint is closer than any previous ones
+    {
+      nextWaypoint.first = i;
+      distance2_left = (CurrPos.first-trajectory[i].yleft)*(CurrPos.first-trajectory[i].yleft)+(CurrPos.second-trajectory[i].zleft)*(CurrPos.second-trajectory[i].zleft);
+    }
+    
+    if ( (CurrPos.third-trajectory[i].yright)*(CurrPos.third-trajectory[i].yright)+(CurrPos.fourth-trajectory[i].zright)*(CurrPos.fourth-trajectory[i].zright) < distance2_right )
+    {
+      nextWaypoint.second = i;
+      distance2_left = (CurrPos.third-trajectory[i].yright)*(CurrPos.third-trajectory[i].yright)+(CurrPos.fourth-trajectory[i].zright)*(CurrPos.fourth-trajectory[i].zright);
+    }
+  }
+
+  /* increment next waypoint unless we are already at the last one */
+  if (nextWaypoint.first != noOfWaypoints)
+    nextWaypoint.first++;
+  if (nextWaypoint.second != noOfWaypoints)
+    nextWaypoint.second++;
+  
+  return nextWaypoint;
+}
+  
 
 
 void setup() //this runs once after startup or reset
