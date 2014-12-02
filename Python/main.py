@@ -19,6 +19,7 @@ except socket.error:
     print('connection error vision server')
     sys.exit(0)
 
+''' 
 #### Setup USB Connection to OpenCM ####
 
 ser = serial.Serial(
@@ -30,6 +31,7 @@ ser = serial.Serial(
     timeout=None
 )
 ser.isOpen()
+'''
 
 #### variable definitions and initialization ####
 
@@ -144,6 +146,8 @@ while True:
 		
 		#Test if new prediction is sufficiently away from previous. If yes, send to openCM
 		if abs(t_goal-t_goal_prev)>tTol or abs(y_goal-y_goal_prev)>distTol or abs(z_goal-z_goal_prev)>distTol:
+			# SEND TO DYNAMIXEL
+			'''
 			#now send goal position to robot if OpenCM is ready
 			if ser.inWaiting() > 0 or loopcount == 0:
 				out = ''
@@ -154,6 +158,7 @@ while True:
 			
 				if out == str(unichr(6)):
 					ser.write(goalieFunctions.packInteger(t_goal*100)+goalieFunctions.packInteger(y_goal*100)+goalieFunctions.packInteger(z_goal*100))
+					
 					print("Sent new goal position")
 					#sent was successfull, hence update prev values
 					t_goal_prev = t_goal
@@ -163,6 +168,7 @@ while True:
 					print("Was ready but received " + out)
 			else:
 				print("OpenCM was not ready")
+			'''
 		
 
 
