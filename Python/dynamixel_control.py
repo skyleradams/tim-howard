@@ -166,7 +166,13 @@ class Arm(object):
 			return False
 		
 
-
+#function that will run as thread parallel to vision loop
+def DxlMotionThread():
+	while threadAlive:
+		a.update()
+		#determine next waypoint here. For now just set goal position.
+		next = [y_goal,z_goal] #y_goal, z_goal read from parent process (main.py)
+		a.moveToXYGoal(next)
 
 a = Arm(myActuators[0], myActuators[1], options.left_arm)
 
