@@ -8,6 +8,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import time
 import sys,socket,struct,signal,serial
 
+'''
 ########  Set up TCP/IP Connection #### (prewritten code for vision system)
 serverIP = '192.168.1.212'  #Use with the 2.12 Servers
 #serverIP = 'localhost'      #Use for loopback testing on your own computer
@@ -20,7 +21,7 @@ except socket.error:
     sys.exit(0)
 
 #### Setup USB Connection to OpenCM ####
-'''
+
 ser = serial.Serial(
     port='/dev/ttyACM0',
     baudrate=9600,
@@ -64,7 +65,7 @@ kf = goalieFunctions.initKalman(initstate, initcovariance)
 prev_filtered_state_mean = initstate
 prev_filtered_state_covariance = initcovariance
 
-numframes = 500
+numframes = 1000
 RawCameraData = []
 
 
@@ -91,24 +92,25 @@ plt.show()
 tic = time.time()
 loopcount = 0
 loopRuntime = 0
-(x1, y1, a1, x2, y2, a2, timestamp_prev) = goalieFunctions.getVals(s1) #initialzise previous timestamp
-#SavedData=np.load("RawCameraData_RestingBall_1000.npy")
-#(x1, y1, a1, x2, y2, a2, timestamp_prev) = SavedData[0]
+#(x1, y1, a1, x2, y2, a2, timestamp_prev) = goalieFunctions.getVals(s1) #initialzise previous timestamp
+SavedData=np.load("RawCameraData_Kicking_1000.npy")
+(x1, y1, a1, x2, y2, a2, timestamp_prev) = SavedData[0]
 while True:
 	
 	if loopcount >= numframes:
 		break
 
-	(x1, y1, a1, x2, y2, a2, timestamp) = goalieFunctions.getVals(s1) #grab frame from camera
-	#(x1, y1, a1, x2, y2, a2, timestamp) = SavedData[loopcount]
+	#(x1, y1, a1, x2, y2, a2, timestamp) = goalieFunctions.getVals(s1) #grab frame from camera
+	(x1, y1, a1, x2, y2, a2, timestamp) = SavedData[loopcount]
 
 	timestamp_current = timestamp
 	deltaT = timestamp_current-timestamp_prev
 	timestamp_prev = timestamp_current #update
 
-	
+	'''
 	if deltaT == 0: #camera gave us old frame that we already have -- discard and try again
 		continue
+	'''
 
 	RawCameraData.append((x1, y1, a1, x2, y2, a2, timestamp))
 	camera_observation = goalieFunctions.cameraTransform( x1, y1, a1, x2, y2, a2) #transfrom to our system
@@ -187,7 +189,7 @@ while True:
 	#TODO: implement break mechanism to loop
 toc = time.time() - tic
 print("Time per loop iteration is " + str(toc/loopcount) + " s. Corresponds to " + str(loopcount/toc) + " Hz.")
-s1.close() #disconnect from vision network 
+#s1.close() #disconnect from vision network 
 
 #### Postrun data processing ####
 #np.save("RawCameraData", RawCameraData) #save for later processing. Access single camera outputs with RawCameraData=np.load("RawCameraData.npy") (x1, y1, a1, x2, y2, a2, timestamp) = RawCameraData[i]
