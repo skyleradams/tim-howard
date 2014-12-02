@@ -68,7 +68,6 @@ kf = goalieFunctions.initKalman(initstate, initcovariance)
 prev_filtered_state_mean = initstate
 prev_filtered_state_covariance = initcovariance
 
-numframes = 500
 RawCameraData = []
 
 
@@ -104,8 +103,6 @@ loopRuntime = 0
 #(x1, y1, a1, x2, y2, a2, timestamp_prev) = SavedData[0]
 while True:
 	try:
-		if loopcount >= numframes:
-			break
 
 		(x1, y1, a1, x2, y2, a2, timestamp) = goalieFunctions.getVals(s1) #grab frame from camera
 		#(x1, y1, a1, x2, y2, a2, timestamp) = SavedData[loopcount]
@@ -201,7 +198,6 @@ while True:
 		break
 		
 
-		#TODO: implement break mechanism to loop
 toc = time.time() - tic
 print("Time per loop iteration is " + str(toc/loopcount) + " s. Corresponds to " + str(loopcount/toc) + " Hz.")
 s1.close() #disconnect from vision network 
