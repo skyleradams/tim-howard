@@ -14,7 +14,6 @@ ticks_per_rad = 4096.0/(math.pi*2)
 # /_/ /_/_/_/_/ /_//_/\____/|__,__/\_,_/_/  \_,_/  
 ############################################
 
-myActuators = list()
 
 
 def forwardKinematics(theta1, theta2, l1, l2):
@@ -85,6 +84,7 @@ net = dynamixel.dynamixel_network.DynamixelNetwork( serial )
 net.scan( 1, options.num_servos )
 
 print "Scanning for Dynamixels...",
+myActuators = list()
 for dyn in net.get_dynamixels():
     print dyn.id,
     myActuators.append(net[dyn.id])
@@ -167,7 +167,7 @@ class Arm(object):
 		
 
 #function that will run as thread parallel to vision loop
-def DxlMotionThread():
+def DxlMotionThread(a):
 	while threadAlive:
 		a.update()
 		#determine next waypoint here. For now just set goal position.

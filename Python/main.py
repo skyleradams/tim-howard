@@ -6,9 +6,9 @@ from matplotlib import pyplot as plt
 from matplotlib.pylab import subplots,close
 from mpl_toolkits.mplot3d import Axes3D
 import time
-import sys,socket,struct,signal,serial
+import sys,socket,struct,signal,serial,platform
 from threading import Thread
-import dynamixel_control
+import dynamixel_control,options,dynamixel
 
 ########  Set up TCP/IP Connection #### (prewritten code for vision system)
 serverIP = '192.168.1.212'  #Use with the 2.12 Servers
@@ -89,9 +89,36 @@ plt.ion()
 plt.show()
 #end plot commands
 
-#initialize dynamixel control here
+#### initialize dynamixel control
+if platform.dist()[0] == 'Ubuntu':
+    portName = options.ubuntu_port
+elif os.name == "posix":
+    portName = options.unix_port
+else:
+    portName = options.windows_port
+
+serial = dynamixel.serial_stream.SerialStream( port=portName, baudrate=options.baudrate, timeout=1)
+net = dynamixel.dynamixel_network.DynamixelNetwork( serial )
+net.scan( 1, options.num_servos )
+
+myActuators = list()
+print "Scanning for Dynamixels...",
+for dyn in net.get_dynamixels():
+    print dyn.id,
+    myActuators.append(net[dyn.id])
+
+print "FOUND:" + str(myActuators)
+
+for actuator in myActuators:
+	actuator.moving_speed = options.servo_speed
+	actuator.synchronized = True
+	actuator.torque_enable = True
+	actuator.torque_control_enable = False
+	actuator.torque_limit = 1024
+	actuator.max_torque = 1024
+a = dynamixel_control.Arm(myActuators[0], myActuators[1], options.left_arm)
 threadAlive = True
-t = Thread(target=dynamixel_control.DxlMotionThread, args=())
+t = Thread(target=dynamixel_control.DxlMotionThread, args=(a))
 t.start()
 
 #### Runtime loop ####
