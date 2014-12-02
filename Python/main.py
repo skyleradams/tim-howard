@@ -20,7 +20,7 @@ except socket.error:
     sys.exit(0)
 
 #### Setup USB Connection to OpenCM ####
-
+'''
 ser = serial.Serial(
     port='/dev/ttyACM0',
     baudrate=9600,
@@ -30,6 +30,7 @@ ser = serial.Serial(
     timeout=None
 )
 ser.isOpen()
+'''
 
 #### variable definitions and initialization ####
 
@@ -141,7 +142,7 @@ while True:
 		y_goal = predictedState[1]
 		z_goal = predictedState[2]
 
-		
+		'''
 		#Test if new prediction is sufficiently away from previous. If yes, send to openCM
 		if abs(t_goal-t_goal_prev)>tTol or abs(y_goal-y_goal_prev)>distTol or abs(z_goal-z_goal_prev)>distTol:
 			#now send goal position to robot if OpenCM is ready
@@ -163,7 +164,7 @@ while True:
 					print("Was ready but received " + out)
 			else:
 				print("OpenCM was not ready")
-		
+		'''
 
 
 	#start live plotting:
