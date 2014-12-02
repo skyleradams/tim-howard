@@ -10,7 +10,7 @@ def signal_handler(signal, frame):
     sys.exit(0)
 
 def getVals(sObj):
-    sObj.send('r')
+    sObj.send('s')
     raw = sObj.recv(16)
     x1 = struct.unpack('>H',raw[0:2])[0]
     y1 = struct.unpack('>H',raw[2:4])[0]

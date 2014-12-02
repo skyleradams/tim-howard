@@ -63,15 +63,14 @@ kf = goalieFunctions.initKalman(initstate, initcovariance)
 prev_filtered_state_mean = initstate
 prev_filtered_state_covariance = initcovariance
 
-numframes = 500
 RawCameraData = []
 
 
 #start plot commands
 realtime_fig,realtime_ax = subplots(1,1)
 realtime_ax.set_aspect('equal')
-realtime_ax.set_xlim(-3,3)
-realtime_ax.set_ylim(-3,3)
+realtime_ax.set_xlim(-4,4)
+realtime_ax.set_ylim(-4,4)
 realtime_ax.set_xlabel("x [m]")
 realtime_ax.set_ylabel("y [m]")
 realtime_ax.set_title("Live plot of x-y plane")
@@ -94,100 +93,100 @@ loopRuntime = 0
 #SavedData=np.load("RawCameraData_RestingBall_1000.npy")
 #(x1, y1, a1, x2, y2, a2, timestamp_prev) = SavedData[0]
 while True:
+	try:
+
+		(x1, y1, a1, x2, y2, a2, timestamp) = goalieFunctions.getVals(s1) #grab frame from camera
+		#(x1, y1, a1, x2, y2, a2, timestamp) = SavedData[loopcount]
+
+		timestamp_current = timestamp
+		deltaT = timestamp_current-timestamp_prev
+		timestamp_prev = timestamp_current #update
+
 	
-	if loopcount >= numframes:
+		if deltaT == 0: #camera gave us old frame that we already have -- discard and try again
+			continue
+
+		RawCameraData.append((x1, y1, a1, x2, y2, a2, timestamp))
+		camera_observation = goalieFunctions.cameraTransform( x1, y1, a1, x2, y2, a2) #transfrom to our system
+	
+		pxRaw.append(camera_observation[0])
+		pyRaw.append(camera_observation[1])
+		pzRaw.append(camera_observation[2])
+	
+		A, b = goalieFunctions.transitionMatrices(deltaT,prev_filtered_state_mean)
+		[next_filtered_state_mean, next_filtered_state_covariance] = kf.filter_update(prev_filtered_state_mean, prev_filtered_state_covariance, observation=camera_observation, transition_matrix=A, transition_offset=b, transition_covariance=None, observation_matrix=None, observation_offset=None, observation_covariance=None)
+
+		pxFilt.append(next_filtered_state_mean[0])
+		pyFilt.append(next_filtered_state_mean[1])
+		pzFilt.append(next_filtered_state_mean[2])
+
+	
+		# predicting target position on goal (may implement to execute less frequently than whole loop)
+		px = next_filtered_state_mean[0]
+		vx = next_filtered_state_mean[3]
+		if vx < 0 and px > pxGoalie: #if not, ball not heading towards goal or is behind it
+			predictionStep = 0
+			predictedState = next_filtered_state_mean
+			predictedCovariance = next_filtered_state_covariance
+			while predictedState[0] >= pxGoalie and predictionStep*deltaT_predictor < predictTimelimit:
+				#do kalman predition steps without measurement
+				A,b = goalieFunctions.transitionMatrices(deltaT_predictor,predictedState)
+				[predictedState, predictedCovariance] = kf.filter_update(predictedState, predictedCovariance, observation=None, transition_matrix=A, transition_offset=b, transition_covariance=None, observation_matrix=None, observation_offset=None, observation_covariance=None)
+				predictionStep += 1
+
+			t_goal = deltaT_predictor*predictionStep #time from point of prediction start to time of goal
+			y_goal = predictedState[1]
+			z_goal = predictedState[2]
+
+		
+			#Test if new prediction is sufficiently away from previous. If yes, send to openCM
+			if abs(t_goal-t_goal_prev)>tTol or abs(y_goal-y_goal_prev)>distTol or abs(z_goal-z_goal_prev)>distTol:
+				# SEND TO DYNAMIXEL
+				'''
+				#now send goal position to robot if OpenCM is ready
+				if ser.inWaiting() > 0 or loopcount == 0:
+					out = ''
+					if loopcount != 0:
+						out = ser.read(1)
+					else:
+						out = str(unichr(6))
+			
+					if out == str(unichr(6)):
+						ser.write(goalieFunctions.packInteger(t_goal*100)+goalieFunctions.packInteger(y_goal*100)+goalieFunctions.packInteger(z_goal*100))
+					
+						print("Sent new goal position")
+						#sent was successfull, hence update prev values
+						t_goal_prev = t_goal
+						y_goal_prev = y_goal
+						z_goal_prev = z_goal
+					else:
+						print("Was ready but received " + out)
+				else:
+					print("OpenCM was not ready")
+				'''
+		
+
+
+		#start live plotting:
+		realtime_plothandle_kalman.set_data(next_filtered_state_mean[0],next_filtered_state_mean[1])
+		realtime_plothandle_measurement.set_data(camera_observation[0],camera_observation[1])
+		realtime_fig.canvas.restore_region(background)
+		realtime_ax.draw_artist(realtime_plothandle_kalman)
+		realtime_ax.draw_artist(realtime_plothandle_measurement)
+		realtime_fig.canvas.blit(realtime_ax.bbox)
+		#end live plotting
+
+		#update for next loop
+		prev_filtered_state_mean = next_filtered_state_mean
+		prev_filtered_state_covariance = next_filtered_state_covariance
+	
+		loopcount += 1
+		timevec.append(loopRuntime)
+		loopRuntime += deltaT
+
+	except KeyboardInterrupt:
 		break
 
-	(x1, y1, a1, x2, y2, a2, timestamp) = goalieFunctions.getVals(s1) #grab frame from camera
-	#(x1, y1, a1, x2, y2, a2, timestamp) = SavedData[loopcount]
-
-	timestamp_current = timestamp
-	deltaT = timestamp_current-timestamp_prev
-	timestamp_prev = timestamp_current #update
-
-	
-	if deltaT == 0: #camera gave us old frame that we already have -- discard and try again
-		continue
-
-	RawCameraData.append((x1, y1, a1, x2, y2, a2, timestamp))
-	camera_observation = goalieFunctions.cameraTransform( x1, y1, a1, x2, y2, a2) #transfrom to our system
-	
-	pxRaw.append(camera_observation[0])
-	pyRaw.append(camera_observation[1])
-	pzRaw.append(camera_observation[2])
-	
-	A, b = goalieFunctions.transitionMatrices(deltaT,prev_filtered_state_mean)
-	[next_filtered_state_mean, next_filtered_state_covariance] = kf.filter_update(prev_filtered_state_mean, prev_filtered_state_covariance, observation=camera_observation, transition_matrix=A, transition_offset=b, transition_covariance=None, observation_matrix=None, observation_offset=None, observation_covariance=None)
-
-	pxFilt.append(next_filtered_state_mean[0])
-	pyFilt.append(next_filtered_state_mean[1])
-	pzFilt.append(next_filtered_state_mean[2])
-
-	
-	# predicting target position on goal (may implement to execute less frequently than whole loop)
-	px = next_filtered_state_mean[0]
-	vx = next_filtered_state_mean[3]
-	if vx < 0 and px > pxGoalie: #if not, ball not heading towards goal or is behind it
-		predictionStep = 0
-		predictedState = next_filtered_state_mean
-		predictedCovariance = next_filtered_state_covariance
-		while predictedState[0] >= pxGoalie and predictionStep*deltaT_predictor < predictTimelimit:
-			#do kalman predition steps without measurement
-			A,b = goalieFunctions.transitionMatrices(deltaT_predictor,predictedState)
-			[predictedState, predictedCovariance] = kf.filter_update(predictedState, predictedCovariance, observation=None, transition_matrix=A, transition_offset=b, transition_covariance=None, observation_matrix=None, observation_offset=None, observation_covariance=None)
-			predictionStep += 1
-
-		t_goal = deltaT_predictor*predictionStep #time from point of prediction start to time of goal
-		y_goal = predictedState[1]
-		z_goal = predictedState[2]
-
-		
-		#Test if new prediction is sufficiently away from previous. If yes, send to openCM
-		if abs(t_goal-t_goal_prev)>tTol or abs(y_goal-y_goal_prev)>distTol or abs(z_goal-z_goal_prev)>distTol:
-			# SEND TO DYNAMIXEL
-			'''
-			#now send goal position to robot if OpenCM is ready
-			if ser.inWaiting() > 0 or loopcount == 0:
-				out = ''
-				if loopcount != 0:
-					out = ser.read(1)
-				else:
-					out = str(unichr(6))
-			
-				if out == str(unichr(6)):
-					ser.write(goalieFunctions.packInteger(t_goal*100)+goalieFunctions.packInteger(y_goal*100)+goalieFunctions.packInteger(z_goal*100))
-					
-					print("Sent new goal position")
-					#sent was successfull, hence update prev values
-					t_goal_prev = t_goal
-					y_goal_prev = y_goal
-					z_goal_prev = z_goal
-				else:
-					print("Was ready but received " + out)
-			else:
-				print("OpenCM was not ready")
-			'''
-		
-
-
-	#start live plotting:
-	realtime_plothandle_kalman.set_data(next_filtered_state_mean[0],next_filtered_state_mean[1])
-	realtime_plothandle_measurement.set_data(camera_observation[0],camera_observation[1])
-	realtime_fig.canvas.restore_region(background)
-	realtime_ax.draw_artist(realtime_plothandle_kalman)
-	realtime_ax.draw_artist(realtime_plothandle_measurement)
-	realtime_fig.canvas.blit(realtime_ax.bbox)
-	#end live plotting
-
-	#update for next loop
-	prev_filtered_state_mean = next_filtered_state_mean
-	prev_filtered_state_covariance = next_filtered_state_covariance
-	
-	loopcount += 1
-	timevec.append(loopRuntime)
-	loopRuntime += deltaT
-
-	#TODO: implement break mechanism to loop
 toc = time.time() - tic
 print("Time per loop iteration is " + str(toc/loopcount) + " s. Corresponds to " + str(loopcount/toc) + " Hz.")
 s1.close() #disconnect from vision network 
