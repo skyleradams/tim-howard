@@ -86,7 +86,7 @@ def cameraTransform( x1, y1, a1, x2, y2, a2 ):
 	#crop_x_bottom = 0
 	#crop_y_left = 0
 	#crop_y_right = 0
-    inToM = 0.0254
+	inToM = 0.0254
 	#The overall pixel lengths (size of picture)
 	x_pic1 = 664
 	x_pic2 = 480
@@ -109,13 +109,13 @@ def cameraTransform( x1, y1, a1, x2, y2, a2 ):
 
 	#According to a linear interpolation of the calibration data
 	#x_ball = (0.1981*x1 + 6.64643)*inToM #[m] depends only on pixels in x direction
-    #x_ball = (6.523 + 0.1981*x1 + 0.0004668*y1_adj)*inToM  #depends on pixels in x and y
-    x_ball = (8.66 + 0.1905*x1 - 0.01139*y1_adj + 7.66e-6*x1^2 + 1.086e-5*x1*y1_adj + 1.741e-5*y1_adj^2)*inToM #more accurate calc depending on both x and y dire
+	#x_ball = (6.523 + 0.1981*x1 + 0.0004668*y1_adj)*inToM  #depends on pixels in x and y
+	x_ball = (8.66 + 0.1905*x1 - 0.01139*y1_adj + 7.66e-6*x1^2 + 1.086e-5*x1*y1_adj + 1.741e-5*y1_adj^2)*inToM #more accurate calc depending on both x and y dire
     
-    #follows same pattern as x ball
+	#follows same pattern as x ball
 	#y_ball = (0.195*y1_adj + 1.3193)*2.54/100 #[m]
-    #y_ball = (2.258 - 0.002925*x1 + 0.1951*y1_adj)*inToM
-    y_ball = (2.701 - 0.005226*x1 + 0.1928*y1_adj + 3.707e-6*x1^2 - 5.647e-7*x1*y1_adj + 5.216e-6*y1_adj^2)*inToM
+	#y_ball = (2.258 - 0.002925*x1 + 0.1951*y1_adj)*inToM
+	y_ball = (2.701 - 0.005226*x1 + 0.1928*y1_adj + 3.707e-6*x1^2 - 5.647e-7*x1*y1_adj + 5.216e-6*y1_adj^2)*inToM
 
 	d_xy = math.sqrt((x_ball-x_cam2)**2+(y_ball-y_cam2)**2);
 	#z_ball = z_cam2 - (x2-(x_pic2)/2) / f_2 * d_xy;
