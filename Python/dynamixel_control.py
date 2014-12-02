@@ -1,4 +1,4 @@
-import os
+import os, platform
 import dynamixel
 import time
 import options
@@ -73,8 +73,9 @@ def actuatorsMoving(actuators):
             return True
     return False
 
-
-if os.name == "posix":
+if platform.dist()[0] == 'Ubuntu':
+    portName = options.ubuntu_port
+elif os.name == "posix":
     portName = options.unix_port
 else:
     portName = options.windows_port
@@ -97,11 +98,6 @@ for actuator in myActuators:
 	actuator.torque_control_enable = False
 	actuator.torque_limit = 1024
 	actuator.max_torque = 1024
-
-
-
-
-
 
 
 class Arm(object):

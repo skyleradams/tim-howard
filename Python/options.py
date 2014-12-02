@@ -40,6 +40,7 @@ right_arm = R_params()
 
 windows_port = "COM8"
 unix_port = "/dev/tty.usbserial-A4012933"
+ubuntu_port = "/dev/ttyUSB0"
 
 num_servos = 2
 servo_speed = 300
