@@ -38,8 +38,6 @@ ser.isOpen()
 pxGoalie = 0.2 #[m] Position of goalie
 deltaT_predictor = 0.1 #timestep for prediction... accuracy vs speed
 predictTimelimit = 4; #[s] Time limit to abort kalman predictor
-goalwidth = 0.7 #[m]
-goalheight = 1 #[m]
 
 #tolerances for sending values to OpenCM
 tTol = 0.2
@@ -232,6 +230,8 @@ plt.xlabel('Time [s]')
 plt.ylabel('z Position')
 plt.legend(loc=2)
 
+goalwidth = 0.7 #[m]
+goalheight = 1 #[m]
 goalcorners = np.matrix([[pxGoalie,-goalwidth/2,0],[pxGoalie,-goalwidth/2,goalheight],[pxGoalie,goalwidth/2,goalheight],[pxGoalie,goalwidth/2,0]])
 fig3d = plt.figure(5)
 ax = fig3d.add_subplot(111, projection='3d',)
