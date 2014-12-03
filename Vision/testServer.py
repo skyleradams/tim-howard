@@ -46,7 +46,7 @@ if __name__ == '__main__':
     t.start()
     print('server start')
     n=0
-    while n<=10000:
+    while True:
         timestamp = time.time() - tStart
         n+=1
         time.sleep(.001)

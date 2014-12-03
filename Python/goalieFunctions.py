@@ -21,7 +21,7 @@ def getVals(sObj):
 		a2 = struct.unpack('>H',raw[10:12])[0]
 		timestamp = struct.unpack('>f',raw[12:16])[0]
 		return (x1, y1, a1, x2, y2, a2, timestamp)
-	except
+	except:
 		print "Vision server error"
 		return (0,0,0,0,0,0,0)
 	

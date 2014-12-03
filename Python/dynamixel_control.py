@@ -185,21 +185,45 @@ class Arm(object):
 
 
 a = Arm(myActuators[0], myActuators[1], options.left_arm)
-
-goal = (0,0)
+b = Arm(myActuators[2], myActuators[3], options.right_arm)
 a.update()
-#a.moveToXYGoal(goal[0], goal[1])
+b.update()
+
+points = [[55,0],[50,0],[45,0],[40,0],[35,0],[30,0],[25,0],[20,0],[15,0],[10,0],[5,0]]
+goal = [0,0]
+
+t = time.time()
 
 while True:
 	try:
+
+		(theta1_left, theta2_left) = a.returnCurrentPositions()
+		(theta1_right, theta2_right) = b.returnCurrentPositions()
+
+		currXY_left = forwardKinematics(theta1_left, theta2_left, options.left_arm.l1, options.left_arm.l2) #in robot coords
+		currXY_left_world = [currXY_left[0]+options.left_arm.horizontal_offset, currXY_left[1]+options.left_arm.vertical_offset]
+		gamma_left = math.atan2(goal[1]-currXY_left_world[1], goal[0]-currXY_left_world[0])
+		currXY_right = forwardKinematics(theta1_right, theta2_right, options.right_arm.l1, options.right_arm.l2) #in robot coords
+		currXY_right_world = [currXY_right[0]+options.right_arm.horizontal_offset, currXY_right[1]+options.right_arm.vertical_offset]
+		gamma_right = math.atan2(goal[1]-currXY_right_world[1], goal[0]-currXY_right_world[0])
+
+		l_left=2
+		l_right=2
+		if( ((goal[1]-currXY_left_world[1])**2 + (goal[0]-currXY_left_world[0])**2) < l_left**2):
+			l_left = math.sqrt((goal[1]-currXY_left_world[1])**2 + (goal[0]-currXY_left_world[0])**2)
+		if ( ((goal[1]-currXY_right_world[1])**2 + (goal[0]-currXY_right_world[0])**2) < l_right**2):
+			l_right = math.sqrt((goal[1]-currXY_right_world[1])**2 + (goal[0]-currXY_right_world[0])**2)
+
+		a.moveToXYGoal(currXY_left_world[0]+l_left*math.cos(gamma_left), currXY_left_world[1]+l_left*math.sin(gamma_left))
+		b.moveToXYGoal(currXY_right_world[0]+l_right*math.cos(gamma_right), currXY_right_world[1]+l_right*math.sin(gamma_right))
 		a.update()
-		(theta1, theta2) = a.returnCurrentPositions()
-		currXY = forwardKinematics(theta1, theta2, options.left_arm.l1, options.left_arm.l2) #in robot coords
-		currXY_world = [currXY[0]+options.left_arm.horizontal_offset, currXY[1]+options.left_arm.vertical_offset]
-		gamma = math.atan2(goal[1]-currXY_world[1], goal[0]-currXY_world[0])
-		l=1.5
-		#if not a.nearGoalPosition():
-		a.moveToXYGoal(currXY_world[0]+l*math.cos(gamma), currXY_world[1]+l*math.sin(gamma))
-		print currXY_world + [currXY_world[0]+l*math.cos(gamma), currXY_world[1]+l*math.sin(gamma)]
+		b.update()
+
+		'''
+		if time.time() > 1+t:
+			goal = points.pop()
+			t = time.time()
+		'''
+		
 	except KeyboardInterrupt:
 		break

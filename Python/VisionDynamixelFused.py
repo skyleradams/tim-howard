@@ -193,13 +193,15 @@ class Arm(object):
 
 
 a = Arm(myActuators[0], myActuators[1], options.left_arm)
+b = Arm(myActuators[2], myActuators[3], options.right_arm)
 a.update()
+b.update()
 
 '''Definitions and initialization vision'''
 
 ########  Set up TCP/IP Connection #### (prewritten code for vision system)
-serverIP = '192.168.1.212'  #Use with the 2.12 Servers
-#serverIP = 'localhost'      #Use for loopback testing on your own computer
+#serverIP = '192.168.1.212'  #Use with the 2.12 Servers
+serverIP = 'localhost'      #Use for loopback testing on your own computer
 s1=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 try:
     s1.connect((serverIP,2121))
@@ -271,8 +273,8 @@ while True:
 
 		(x1, y1, a1, x2, y2, a2, timestamp) = goalieFunctions.getVals(s1) #grab frame from camera
 		if a1 == 0:
-			a1 = -999
 			continue
+		print (x1, y1, a1, x2, y2, a2, timestamp)
 		#(x1, y1, a1, x2, y2, a2, timestamp) = SavedData[loopcount]
 
 		timestamp_current = timestamp
@@ -322,13 +324,27 @@ while True:
 
 				goal = [y_goalcoords_in, z_goalcoords_in]
 				print "moving to"+str(goal)
+				(theta1_left, theta2_left) = a.returnCurrentPositions()
+				(theta1_right, theta2_right) = b.returnCurrentPositions()
+
+				currXY_left = forwardKinematics(theta1_left, theta2_left, options.left_arm.l1, options.left_arm.l2) #in robot coords
+				currXY_left_world = [currXY_left[0]+options.left_arm.horizontal_offset, currXY_left[1]+options.left_arm.vertical_offset]
+				gamma_left = math.atan2(goal[1]-currXY_left_world[1], goal[0]-currXY_left_world[0])
+				currXY_right = forwardKinematics(theta1_right, theta2_right, options.right_arm.l1, options.right_arm.l2) #in robot coords
+				currXY_right_world = [currXY_right[0]+options.right_arm.horizontal_offset, currXY_right[1]+options.right_arm.vertical_offset]
+				gamma_right = math.atan2(goal[1]-currXY_right_world[1], goal[0]-currXY_right_world[0])
+
+				l_left=2
+				l_right=2
+				if( ((goal[1]-currXY_left_world[1])**2 + (goal[0]-currXY_left_world[0])**2) < l_left**2):
+					l_left = math.sqrt((goal[1]-currXY_left_world[1])**2 + (goal[0]-currXY_left_world[0])**2)
+				if ( ((goal[1]-currXY_right_world[1])**2 + (goal[0]-currXY_right_world[0])**2) < l_right**2):
+					l_right = math.sqrt((goal[1]-currXY_right_world[1])**2 + (goal[0]-currXY_right_world[0])**2)
+
+				a.moveToXYGoal(currXY_left_world[0]+l_left*math.cos(gamma_left), currXY_left_world[1]+l_left*math.sin(gamma_left))
+				b.moveToXYGoal(currXY_right_world[0]+l_right*math.cos(gamma_right), currXY_right_world[1]+l_right*math.sin(gamma_right))
 				a.update()
-				(theta1, theta2) = a.returnCurrentPositions()
-				currXY = forwardKinematics(theta1, theta2, options.left_arm.l1, options.left_arm.l2) #in robot coords
-				currXY_world = [currXY[0]+options.left_arm.horizontal_offset, currXY[1]+options.left_arm.vertical_offset]
-				gamma = math.atan2(goal[1]-currXY_world[1], goal[0]-currXY_world[0])
-				l=1.5
-				a.moveToXYGoal(currXY_world[0]+l*math.cos(gamma), currXY_world[1]+l*math.sin(gamma))		
+				b.update()
 
 
 		#start live plotting:
