@@ -1,4 +1,5 @@
 import numpy as np
+import math
 from pykalman import KalmanFilter
 import sys,socket,time,struct,signal,serial,math
 
@@ -94,13 +95,14 @@ def cameraTransform( x1, y1, a1, x2, y2, a2 ):
 	inToM = 0.0254
 	#The overall pixel lengths (size of picture)
 	x_pic1 = 664
-	x_pic2 = 480
+	x_pic2 = 752
 	y_pic1 = 472
-	y_pic2 = 360
+	y_pic2 = 480
 
 	#Adjust
 	#y1_adj = 472 - y1 #pixels
-	y1_adj = y1
+	y1_adj = y1 #silly me
+	z = 480 - y2
     
 
 	x_cam2 = 0
@@ -123,10 +125,13 @@ def cameraTransform( x1, y1, a1, x2, y2, a2 ):
 	#y_ball = (2.258 - 0.002925*x1 + 0.1951*y1_adj)*inToM
 	y_ball = (2.701 - 0.005226*x1 + 0.1928*y1_adj + 3.707e-6*x1**2 - 5.647e-7*x1*y1_adj + 5.216e-6*y1_adj**2)*inToM
 
-	d_xy = math.sqrt((x_ball-x_cam2)**2+(y_ball-y_cam2)**2);
+	#d_xy = math.sqrt((x_ball-x_cam2)**2+(y_ball-y_cam2)**2);
 	#z_ball = z_cam2 - (x2-(x_pic2)/2) / f_2 * d_xy;
-	z_ball = 0
-
+	#using fit() from matlab, zball = f(z_pixels, xball, yball), but we need to make it a function of only two variables. 
+	#I propose that alpha = atan2(yball, xball), and that will be a property of the zball coordinate.
+	alpha = math.atan2(y_ball, x_ball)
+	z_ball = -19.98 + 3.423*alpha + .09715*z
+	#z_ball = -68.96 - 26.4*alpha + .4684*z + 2.762*alpha*alpha + .0691*alpha*z - .0006249*z*z
 	return [x_ball, y_ball, z_ball]
 
 def packInteger(value):
