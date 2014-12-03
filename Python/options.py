@@ -11,10 +11,10 @@ angle_threshold = .1
 class L_params(object):
 	horizontal_offset = 14.5
 	vertical_offset = 18.5
-	min_y = ball_radius - vertical_offset # in robot coords
+	min_y = ball_radius - vertical_offset+4 # in robot coords
 	max_y = goal_top - vertical_offset
 	min_x = -14.5
-	max_x = 14.5
+	max_x = 14.0
 	l1 = 11
 	l2 = 11
 	shoulder_offset = 0
@@ -25,9 +25,9 @@ class L_params(object):
 class R_params(object):
 	horizontal_offset = 43.5
 	vertical_offset = 18.5
-	min_y = ball_radius - vertical_offset # in robot coords
+	min_y = ball_radius - vertical_offset+4 # in robot coords
 	max_y = goal_top - vertical_offset
-	min_x = -14.5
+	min_x = -14.0
 	max_x = 14.5
 	l1 = 11
 	l2 = 11
@@ -43,6 +43,6 @@ unix_port = "/dev/tty.usbserial-A4012933"
 ubuntu_port = "/dev/ttyUSB0"
 
 num_servos = 2
-servo_speed = 300
+servo_speed = 1000
 baudrate = 400000
 

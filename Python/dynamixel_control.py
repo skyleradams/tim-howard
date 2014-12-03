@@ -176,7 +176,7 @@ def DxlMotionThread(a):
 
 a = Arm(myActuators[0], myActuators[1], options.left_arm)
 
-trajectories = [(30, 18.5),(20, 24) ,(16, 30)]
+trajectories = [(14.5,18.5), (25.5,29.5),(14.5,40.5), (3.5,29.5)]
 
 a.moveToXYGoal(trajectories[0][0], trajectories[0][1])
 

@@ -74,8 +74,8 @@ RawCameraData = []
 #start plot commands
 realtime_fig,realtime_ax = subplots(1,1)
 realtime_ax.set_aspect('equal')
-realtime_ax.set_xlim(-3,3)
-realtime_ax.set_ylim(-3,3)
+realtime_ax.set_xlim(-2,4)
+realtime_ax.set_ylim(-2,4)
 realtime_ax.set_xlabel("x [m]")
 realtime_ax.set_ylabel("y [m]")
 realtime_ax.set_title("Live plot of x-y plane")
@@ -174,6 +174,9 @@ while True:
 			y_goal = predictedState[1]
 			z_goal = predictedState[2]
 
+			y_goalcoords_in = (y_goal*39.37)-18
+			z_goalcoords_in = (z_goal*39.37)
+
 		
 			#Test if new prediction is sufficiently away from previous. If yes, send to openCM
 			if abs(t_goal-t_goal_prev)>tTol or abs(y_goal-y_goal_prev)>distTol or abs(z_goal-z_goal_prev)>distTol:
@@ -223,7 +226,7 @@ while True:
 	except KeyboardInterrupt:
 		threadAlive = False
 		break
-		
+
 
 toc = time.time() - tic
 print("Time per loop iteration is " + str(toc/loopcount) + " s. Corresponds to " + str(loopcount/toc) + " Hz.")
