@@ -271,6 +271,7 @@ while True:
 
 		(x1, y1, a1, x2, y2, a2, timestamp) = goalieFunctions.getVals(s1) #grab frame from camera
 		if a1 == 0:
+			a1 = -999
 			continue
 		#(x1, y1, a1, x2, y2, a2, timestamp) = SavedData[loopcount]
 

@@ -97,6 +97,9 @@ while True:
 
 		(x1, y1, a1, x2, y2, a2, timestamp) = goalieFunctions.getVals(s1) #grab frame from camera
 		#(x1, y1, a1, x2, y2, a2, timestamp) = SavedData[loopcount]
+		#if a1 == 0:
+		#	continue
+		print a1
 
 		timestamp_current = timestamp
 		deltaT = timestamp_current-timestamp_prev
