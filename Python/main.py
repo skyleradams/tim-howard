@@ -69,8 +69,8 @@ RawCameraData = []
 #start plot commands
 realtime_fig,realtime_ax = subplots(1,1)
 realtime_ax.set_aspect('equal')
-realtime_ax.set_xlim(-4,4)
-realtime_ax.set_ylim(-4,4)
+realtime_ax.set_xlim(-2,4)
+realtime_ax.set_ylim(-2,4)
 realtime_ax.set_xlabel("x [m]")
 realtime_ax.set_ylabel("y [m]")
 realtime_ax.set_title("Live plot of x-y plane")
@@ -137,7 +137,6 @@ while True:
 			t_goal = deltaT_predictor*predictionStep #time from point of prediction start to time of goal
 			y_goal = predictedState[1]
 			z_goal = predictedState[2]
-
 		
 			#Test if new prediction is sufficiently away from previous. If yes, send to openCM
 			if abs(t_goal-t_goal_prev)>tTol or abs(y_goal-y_goal_prev)>distTol or abs(z_goal-z_goal_prev)>distTol:

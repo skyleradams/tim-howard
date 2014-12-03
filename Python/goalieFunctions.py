@@ -30,7 +30,7 @@ def initKalman(initstate, initcovariance):
 	Observation_Matrix=[[1,0,0,0,0,0],[0,1,0,0,0,0],[0,0,1,0,0,0]]
 
 	posCov = 1e-5
-	velCov = 1e-3
+	velCov = 5e-4
 	transistionCov=np.diag([posCov,posCov,posCov,velCov,velCov,velCov]) #how confident are we of our model..how about impact cases. more certain about pos than speed?
 	observationCov=0.5e-2*np.eye(3) #measure from data, may change according to blob size
 	kf=KalmanFilter(transition_matrices=Transition_Matrix,
@@ -94,7 +94,8 @@ def cameraTransform( x1, y1, a1, x2, y2, a2 ):
 	y_pic2 = 360
 
 	#Adjust
-	y1_adj = 472 - y1 #pixels
+	#y1_adj = 472 - y1 #pixels
+	y1_adj = y1
     
 
 	x_cam2 = 0
