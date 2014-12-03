@@ -203,15 +203,3 @@ while True:
 		print currXY_world + [currXY_world[0]+l*math.cos(gamma), currXY_world[1]+l*math.sin(gamma)]
 	except KeyboardInterrupt:
 		break
-
-	
-
-
-
-
-
-
-
-
-
-

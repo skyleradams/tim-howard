@@ -10,16 +10,21 @@ def signal_handler(signal, frame):
     sys.exit(0)
 
 def getVals(sObj):
-    sObj.send('s')
-    raw = sObj.recv(16)
-    x1 = struct.unpack('>H',raw[0:2])[0]
-    y1 = struct.unpack('>H',raw[2:4])[0]
-    a1 = struct.unpack('>H',raw[4:6])[0]
-    x2 = struct.unpack('>H',raw[6:8])[0]
-    y2 = struct.unpack('>H',raw[8:10])[0]
-    a2 = struct.unpack('>H',raw[10:12])[0]
-    timestamp = struct.unpack('>f',raw[12:16])[0]
-    return (x1, y1, a1, x2, y2, a2, timestamp)
+	try:
+		sObj.send('s')
+		raw = sObj.recv(16)
+		x1 = struct.unpack('>H',raw[0:2])[0]
+		y1 = struct.unpack('>H',raw[2:4])[0]
+		a1 = struct.unpack('>H',raw[4:6])[0]
+		x2 = struct.unpack('>H',raw[6:8])[0]
+		y2 = struct.unpack('>H',raw[8:10])[0]
+		a2 = struct.unpack('>H',raw[10:12])[0]
+		timestamp = struct.unpack('>f',raw[12:16])[0]
+		return (x1, y1, a1, x2, y2, a2, timestamp)
+	except (ValueError, TypeError):
+		print "Vision server error"
+		return (0,0,0,0,0,0,0)
+	
 
 #### Own functions ####
 
