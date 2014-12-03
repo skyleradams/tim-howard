@@ -46,7 +46,7 @@ t_goal_prev = 0
 y_goal_prev = 0
 z_goal_prev = 0
 
-timevec = [] #initialize time array
+timevec = list()#[] #initialize time array
 pxRaw, pxFilt, pyRaw, pyFilt, pzRaw, pzFilt, vxRaw, vxFilt, vyRaw, vyFilt, vzRaw, vzFilt = [], [], [], [], [], [], [], [], [], [], [], [] #initialize arrays to store data
 
 #initialize the kalman filter
@@ -183,8 +183,8 @@ while True:
 		prev_filtered_state_covariance = next_filtered_state_covariance
 	
 		loopcount += 1
-		timevec.append(loopRuntime)
 		loopRuntime += deltaT
+		timevec.append(loopRuntime)
 
 	except KeyboardInterrupt:
 		break
@@ -231,6 +231,7 @@ plt.xlabel('Time [s]')
 plt.ylabel('z Position')
 plt.legend(loc=2)
 
+'''
 goalwidth = 0.7 #[m]
 goalheight = 1 #[m]
 goalcorners = np.matrix([[pxGoalie,-goalwidth/2,0],[pxGoalie,-goalwidth/2,goalheight],[pxGoalie,goalwidth/2,goalheight],[pxGoalie,goalwidth/2,0]])
@@ -247,6 +248,7 @@ ax.set_ylabel('y')
 ax.set_zlabel('z')
 #ax.legend(loc=2)
 #TODO: animated plot
+'''
 
 plt.show()
 #End plotting results
