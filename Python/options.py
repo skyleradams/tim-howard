@@ -14,7 +14,7 @@ class L_params(object):
 	min_y = ball_radius - vertical_offset # in robot coords
 	max_y = goal_top - vertical_offset
 	min_x = -14.5
-	max_x = 14.5
+	max_x = 14.0
 	l1 = 11
 	l2 = 11
 	shoulder_offset = 0
@@ -27,7 +27,7 @@ class R_params(object):
 	vertical_offset = 18.5
 	min_y = ball_radius - vertical_offset # in robot coords
 	max_y = goal_top - vertical_offset
-	min_x = -14.5
+	min_x = -14.0
 	max_x = 14.5
 	l1 = 11
 	l2 = 11
