@@ -137,6 +137,9 @@ while True:
 			t_goal = deltaT_predictor*predictionStep #time from point of prediction start to time of goal
 			y_goal = predictedState[1]
 			z_goal = predictedState[2]
+
+			y_goalcoords_in = (y_goal*39.37)-18
+			z_goalcoords_in = (z_goal*39.37)
 		
 			#Test if new prediction is sufficiently away from previous. If yes, send to openCM
 			if abs(t_goal-t_goal_prev)>tTol or abs(y_goal-y_goal_prev)>distTol or abs(z_goal-z_goal_prev)>distTol:
