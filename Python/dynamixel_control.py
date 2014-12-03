@@ -18,8 +18,8 @@ myActuators = list()
 
 
 def forwardKinematics(theta1, theta2, l1, l2):
-    return [l1*math.cos(theta1)+l2*(math.cos(theta1)+math.cos(theta2)),
-            l1*math.sin(theta1)+l2*(math.sin(theta1)+math.sin(theta2))]
+    return [l1*math.cos(theta1)+l2*(math.cos(theta1+theta2)),
+            l1*math.sin(theta1)+l2*(math.sin(theta1+theta2))]
 #Given: xE,yE, l1, l2
 #Return: theta1,theta2
 def inverseKinematics(xIn, yIn, l1, l2):
@@ -148,7 +148,7 @@ class Arm(object):
 
 
 	def moveToTheta(self, t1, t2):
-		print t1, t2
+		#print t1, t2
 		self.shoulder_angle = t1
 		self.elbow_angle = t2
 		self.shoulder.goal_position = int((self.shoulder_angle*ticks_per_rad)+self.params.shoulder_offset)
@@ -186,16 +186,24 @@ class Arm(object):
 
 a = Arm(myActuators[0], myActuators[1], options.left_arm)
 
-trajectories = [(0,5),(28,0),(28,30),(10,30)]
+goal = (0,0)
 a.update()
-a.moveToXYGoal(trajectories[0][0], trajectories[0][1])
+#a.moveToXYGoal(goal[0], goal[1])
 
 while True:
-	a.update()
-	print a.returnCurrentPositionsNOMOD()
-	if a.nearGoalPosition():
-		trajectories.pop(0)
-		a.moveToXYGoal(trajectories[0][0], trajectories[0][1])
+	try:
+		a.update()
+		(theta1, theta2) = a.returnCurrentPositions()
+		currXY = forwardKinematics(theta1, theta2, options.left_arm.l1, options.left_arm.l2) #in robot coords
+		currXY_world = [currXY[0]+options.left_arm.horizontal_offset, currXY[1]+options.left_arm.vertical_offset]
+		gamma = math.atan2(goal[1]-currXY_world[1], goal[0]-currXY_world[0])
+		l=1.5
+		#if not a.nearGoalPosition():
+		a.moveToXYGoal(currXY_world[0]+l*math.cos(gamma), currXY_world[1]+l*math.sin(gamma))
+		print currXY_world + [currXY_world[0]+l*math.cos(gamma), currXY_world[1]+l*math.sin(gamma)]
+	except KeyboardInterrupt:
+		break
+
 	
 
 
