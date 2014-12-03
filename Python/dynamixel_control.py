@@ -117,11 +117,22 @@ class Arm(object):
 
 	def moveToXY(self,x,y):
 		theta1, theta2 = inverseKinematics(x,y, self.params.l1, self.params.l2)
-		alt_theta1, alt_theta2 = computeAltIK(x,y, theta1,theta2)
-		if (abs(self.shoulder_angle - theta1)+abs(self.elbow_angle-theta2)) < (abs(self.shoulder_angle - alt_theta1)+abs(self.elbow_angle-alt_theta2)/2):
-			self.moveToTheta(theta1, theta2)
-		else:
-			self.moveToTheta(alt_theta1, alt_theta2)
+		(shoulderCurr, elbowCurr) = self.returnCurrentPositions()
+		(shoulderCurrNOMOD, elbowCurrNOMOD) = self.returnCurrentPositionsNOMOD()
+
+		alpha = shoulderCurr - theta1
+		if abs(alpha) > abs(shoulderCurr - (theta1+2*math.pi)):
+			alpha = shoulderCurr - (theta1+2*math.pi)
+		if abs(alpha) > abs(shoulderCurr - (theta1-2*math.pi)):
+			alpha = shoulderCurr - (theta1-2*math.pi)
+
+		beta = elbowCurr - theta2
+		if abs(beta) > abs(elbowCurr - (theta2+2*math.pi)):
+			beta = elbowCurr - (theta2+2*math.pi)
+		if abs(beta) > abs(elbowCurr - (theta2-2*math.pi)):
+			beta = elbowCurr - (theta2-2*math.pi)
+
+		self.moveToTheta(shoulderCurrNOMOD-alpha, elbowCurrNOMOD-beta)
 
 
 	def moveToXYGoal(self, x, y):
@@ -138,8 +149,8 @@ class Arm(object):
 
 	def moveToTheta(self, t1, t2):
 		print t1, t2
-		self.shoulder_angle = scaleToCircle(t1)
-		self.elbow_angle = scaleToCircle(t2)
+		self.shoulder_angle = t1
+		self.elbow_angle = t2
 		self.shoulder.goal_position = int((self.shoulder_angle*ticks_per_rad)+self.params.shoulder_offset)
 		self.elbow.goal_position = int(((self.elbow_angle*ticks_per_rad) +self.params.elbow_offset)/2)
 
@@ -158,6 +169,11 @@ class Arm(object):
 		theta2 = scaleToCircle(theta2)
 		return (theta1, theta2)
 
+	def returnCurrentPositionsNOMOD(self):
+		theta1 = (self.shoulder.cache[dynamixel.defs.REGISTER['CurrentPosition']]-self.params.shoulder_offset)/ticks_per_rad
+		theta2 = (self.elbow.cache[dynamixel.defs.REGISTER['CurrentPosition']]-self.params.elbow_offset)/ticks_per_rad*2
+		return (theta1, theta2)
+
 	def nearGoalPosition(self):
 		shoulder, elbow = Arm.returnCurrentPositions(self)
 		if withinThreshold(scaleToCircle(shoulder-self.shoulder_angle),self.params.angle_threshold) and withinThreshold(scaleToCircle(elbow-self.elbow_angle),self.params.angle_threshold):
@@ -170,12 +186,13 @@ class Arm(object):
 
 a = Arm(myActuators[0], myActuators[1], options.left_arm)
 
-trajectories = [(14.5,18.5), (25.5,29.5),(14.5,40.5), (3.5,29.5)]
-
+trajectories = [(0,5),(28,0),(28,30),(10,30)]
+a.update()
 a.moveToXYGoal(trajectories[0][0], trajectories[0][1])
 
 while True:
 	a.update()
+	print a.returnCurrentPositionsNOMOD()
 	if a.nearGoalPosition():
 		trajectories.pop(0)
 		a.moveToXYGoal(trajectories[0][0], trajectories[0][1])
