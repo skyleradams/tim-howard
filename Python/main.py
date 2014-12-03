@@ -72,8 +72,8 @@ RawCameraData = []
 #start plot commands
 realtime_fig,realtime_ax = subplots(1,1)
 realtime_ax.set_aspect('equal')
-realtime_ax.set_xlim(-3,3)
-realtime_ax.set_ylim(-3,3)
+realtime_ax.set_xlim(-1,3)
+realtime_ax.set_ylim(-1,3)
 realtime_ax.set_xlabel("x [m]")
 realtime_ax.set_ylabel("y [m]")
 realtime_ax.set_title("Live plot of x-y plane")
@@ -229,6 +229,7 @@ plt.xlabel('Time [s]')
 plt.ylabel('z Position')
 plt.legend(loc=2)
 
+'''
 goalcorners = np.matrix([[pxGoalie,-goalwidth/2,0],[pxGoalie,-goalwidth/2,goalheight],[pxGoalie,goalwidth/2,goalheight],[pxGoalie,goalwidth/2,0]])
 fig3d = plt.figure(5)
 ax = fig3d.add_subplot(111, projection='3d',)
@@ -243,6 +244,7 @@ ax.set_ylabel('y')
 ax.set_zlabel('z')
 #ax.legend(loc=2)
 #TODO: animated plot
+'''
 
 plt.show()
 #End plotting results
