@@ -244,21 +244,21 @@ RawCameraData = []
 
 
 #start plot commands
-realtime_fig,realtime_ax = subplots(1,1)
-realtime_ax.set_aspect('equal')
-realtime_ax.set_xlim(-2,4)
-realtime_ax.set_ylim(-2,4)
-realtime_ax.set_xlabel("x [m]")
-realtime_ax.set_ylabel("y [m]")
-realtime_ax.set_title("Live plot of x-y plane")
-realtime_ax.hold(True)
-realtime_fig.canvas.draw()
-background = realtime_fig.canvas.copy_from_bbox(realtime_ax.bbox)
-realtime_plothandle_measurement = realtime_ax.plot(xinit,yinit,'xr', label='measured')[0]
-realtime_plothandle_kalman = realtime_ax.plot(xinit,yinit,'ob', label='kalman output')[0]
-plt.legend(loc=2)
-plt.ion()
-plt.show()
+# realtime_fig,realtime_ax = subplots(1,1)
+# realtime_ax.set_aspect('equal')
+# realtime_ax.set_xlim(-2,4)
+# realtime_ax.set_ylim(-2,4)
+# realtime_ax.set_xlabel("x [m]")
+# realtime_ax.set_ylabel("y [m]")
+# realtime_ax.set_title("Live plot of x-y plane")
+# realtime_ax.hold(True)
+# realtime_fig.canvas.draw()
+# background = realtime_fig.canvas.copy_from_bbox(realtime_ax.bbox)
+# realtime_plothandle_measurement = realtime_ax.plot(xinit,yinit,'xr', label='measured')[0]
+# realtime_plothandle_kalman = realtime_ax.plot(xinit,yinit,'ob', label='kalman output')[0]
+# plt.legend(loc=2)
+# plt.ion()
+# plt.show()
 #end plot commands
 
 
@@ -342,12 +342,12 @@ while True:
 
 
 		#start live plotting:
-		realtime_plothandle_kalman.set_data(next_filtered_state_mean[0],next_filtered_state_mean[1])
-		realtime_plothandle_measurement.set_data(camera_observation[0],camera_observation[1])
-		realtime_fig.canvas.restore_region(background)
-		realtime_ax.draw_artist(realtime_plothandle_kalman)
-		realtime_ax.draw_artist(realtime_plothandle_measurement)
-		realtime_fig.canvas.blit(realtime_ax.bbox)
+		# realtime_plothandle_kalman.set_data(next_filtered_state_mean[0],next_filtered_state_mean[1])
+		# realtime_plothandle_measurement.set_data(camera_observation[0],camera_observation[1])
+		# realtime_fig.canvas.restore_region(background)
+		# realtime_ax.draw_artist(realtime_plothandle_kalman)
+		# realtime_ax.draw_artist(realtime_plothandle_measurement)
+		# realtime_fig.canvas.blit(realtime_ax.bbox)
 		#end live plotting
 
 		#update for next loop

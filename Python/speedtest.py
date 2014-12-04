@@ -82,7 +82,7 @@ else:
 
 serial = dynamixel.serial_stream.SerialStream( port=portName, baudrate=options.baudrate, timeout=1)
 net = dynamixel.dynamixel_network.DynamixelNetwork( serial )
-net.scan( 1, options.num_servos )
+net.scan( 1, 2 )
 
 print "Scanning for Dynamixels...",
 for dyn in net.get_dynamixels():
@@ -187,9 +187,8 @@ class Arm(object):
 
 
 a = Arm(myActuators[0], myActuators[1], options.left_arm)
-#b = Arm(myActuators[2], myActuators[3], options.right_arm)
 a.update()
-#b.update()
+
 
 for actuator in myActuators:
 	actuator.moving_speed = 50
@@ -203,16 +202,18 @@ a.moveToTheta(math.pi/2, math.pi)
 a.update()
 time.sleep(2)
 
+
+
 for actuator in myActuators:
 	actuator.moving_speed = options.servo_speed
 
 for x in range(10):
 	a.moveToTheta(.98, math.pi+.98)
 	a.update()
-	time.sleep(.25)
+	time.sleep(.2)
 	a.moveToTheta(2, math.pi-.98)
 	a.update()
-	time.sleep(.25)
+	time.sleep(.2)
 
 
 # raw_input("Press any key to start")
