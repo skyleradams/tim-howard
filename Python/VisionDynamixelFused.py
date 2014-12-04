@@ -64,7 +64,7 @@ def boundWithinGoal(value, upper, lower):
 def boundWithinRobotReach(x, y, radius):
 	if math.sqrt(math.pow(x,2)+math.pow(y,2)) > radius:
 		angle = math.atan2(y,x)
-		return (radius*math.cos(angle), radius*math.sin(angle))
+		return (0.98*radius*math.cos(angle), 0.98*radius*math.sin(angle))
 	else:
 		return (x,y)
 def withinThreshold(difference, thresh):
@@ -262,6 +262,8 @@ plt.show()
 #end plot commands
 
 
+raw_input("Press any key to start")
+
 ''' Runtime Loop '''
 tic = time.time()
 loopcount = 0
@@ -319,7 +321,7 @@ while True:
 		
 			#Test if new prediction is sufficiently away from previous. If yes, send to Dynamixel
 			if abs(t_goal-t_goal_prev)>tTol or abs(y_goal-y_goal_prev)>distTol or abs(z_goal-z_goal_prev)>distTol:
-				y_goalcoords_in = (y_goal*39.37)-18
+				y_goalcoords_in = (y_goal*39.37)-18.0
 				z_goalcoords_in = (z_goal*39.37)
 
 				goal = [y_goalcoords_in, z_goalcoords_in]

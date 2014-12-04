@@ -56,7 +56,7 @@ def boundWithinGoal(value, upper, lower):
 def boundWithinRobotReach(x, y, radius):
 	if math.sqrt(math.pow(x,2)+math.pow(y,2)) > radius:
 		angle = math.atan2(y,x)
-		return (radius*math.cos(angle), radius*math.sin(angle))
+		return (0.98*radius*math.cos(angle), 0.98*radius*math.sin(angle))
 	else:
 		return (x,y)
 def withinThreshold(difference, thresh):
@@ -190,10 +190,11 @@ a.update()
 b.update()
 
 points = [[55,0],[50,0],[45,0],[40,0],[35,0],[30,0],[25,0],[20,0],[15,0],[10,0],[5,0]]
-goal = [0,0]
+goal = [14.5,50]
 
 t = time.time()
 
+raw_input("Press any key to start")
 while True:
 	try:
 
