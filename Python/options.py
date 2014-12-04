@@ -39,7 +39,7 @@ left_arm = L_params()
 right_arm = R_params()
 
 windows_port = "COM8"
-unix_port = "/dev/tty.usbserial-A4012933"
+unix_port = "/dev/tty.usbserial-A4012B2H"
 ubuntu_port = "/dev/ttyUSB0"
 
 num_servos = 4

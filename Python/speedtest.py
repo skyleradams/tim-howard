@@ -191,57 +191,76 @@ a = Arm(myActuators[0], myActuators[1], options.left_arm)
 a.update()
 #b.update()
 
+for actuator in myActuators:
+	actuator.moving_speed = 50
+
 leftShoulder = myActuators[0]
 leftElbow = myActuators[1]
 
-goal = [14.5,100]
 
-raw_input("Press any key to start")
-print "Press ctrl+c to start rotation"
-while True:
-	try:
 
-		(theta1_left, theta2_left) = a.returnCurrentPositions()
-		#(theta1_right, theta2_right) = b.returnCurrentPositions()
-
-		currXY_left = forwardKinematics(theta1_left, theta2_left, options.left_arm.l1, options.left_arm.l2) #in robot coords
-		currXY_left_world = [currXY_left[0]+options.left_arm.horizontal_offset, currXY_left[1]+options.left_arm.vertical_offset]
-		gamma_left = math.atan2(goal[1]-currXY_left_world[1], goal[0]-currXY_left_world[0])
-		#currXY_right = forwardKinematics(theta1_right, theta2_right, options.right_arm.l1, options.right_arm.l2) #in robot coords
-		#currXY_right_world = [currXY_right[0]+options.right_arm.horizontal_offset, currXY_right[1]+options.right_arm.vertical_offset]
-		#gamma_right = math.atan2(goal[1]-currXY_right_world[1], goal[0]-currXY_right_world[0])
-
-		l_left=4
-		l_right=4
-		if( ((goal[1]-currXY_left_world[1])**2 + (goal[0]-currXY_left_world[0])**2) < l_left**2):
-			l_left = math.sqrt((goal[1]-currXY_left_world[1])**2 + (goal[0]-currXY_left_world[0])**2)
-		#if ( ((goal[1]-currXY_right_world[1])**2 + (goal[0]-currXY_right_world[0])**2) < l_right**2):
-		#	l_right = math.sqrt((goal[1]-currXY_right_world[1])**2 + (goal[0]-currXY_right_world[0])**2)
-
-		a.moveToXYGoal(currXY_left_world[0]+l_left*math.cos(gamma_left), currXY_left_world[1]+l_left*math.sin(gamma_left))
-		#b.moveToXYGoal(currXY_right_world[0]+l_right*math.cos(gamma_right), currXY_right_world[1]+l_right*math.sin(gamma_right))
-		a.update()
-		#b.update()
-		
-		
-	except KeyboardInterrupt:
-		print "Starting rotation..."
-		break
-
-#activate wheel mode
-leftElbow.ccw_angle_limit = 0
-leftElbow.cw_angle_limit = 0
-leftElbow.moving_speed = 20
-net.synchronize()
-#a.update()
-
+a.moveToTheta(math.pi/2, math.pi)
+a.update()
 time.sleep(2)
-leftElbow.moving_speed = 1
-#a.update()
-net.synchronize()
 
-#activate multiturn mode again
-leftElbow.ccw_angle_limit = 4095
-leftElbow.cw_angle_limit = 4095
-net.synchronize()
+for actuator in myActuators:
+	actuator.moving_speed = options.servo_speed
+
+for x in range(10):
+	a.moveToTheta(.98, math.pi+.98)
+	a.update()
+	time.sleep(.25)
+	a.moveToTheta(2, math.pi-.98)
+	a.update()
+	time.sleep(.25)
+
+
+# raw_input("Press any key to start")
+# print "Press ctrl+c to start rotation"
+# while True:
+# 	try:
+
+# 		(theta1_left, theta2_left) = a.returnCurrentPositions()
+# 		#(theta1_right, theta2_right) = b.returnCurrentPositions()
+
+# 		currXY_left = forwardKinematics(theta1_left, theta2_left, options.left_arm.l1, options.left_arm.l2) #in robot coords
+# 		currXY_left_world = [currXY_left[0]+options.left_arm.horizontal_offset, currXY_left[1]+options.left_arm.vertical_offset]
+# 		gamma_left = math.atan2(goal[1]-currXY_left_world[1], goal[0]-currXY_left_world[0])
+# 		#currXY_right = forwardKinematics(theta1_right, theta2_right, options.right_arm.l1, options.right_arm.l2) #in robot coords
+# 		#currXY_right_world = [currXY_right[0]+options.right_arm.horizontal_offset, currXY_right[1]+options.right_arm.vertical_offset]
+# 		#gamma_right = math.atan2(goal[1]-currXY_right_world[1], goal[0]-currXY_right_world[0])
+
+# 		l_left=4
+# 		l_right=4
+# 		if( ((goal[1]-currXY_left_world[1])**2 + (goal[0]-currXY_left_world[0])**2) < l_left**2):
+# 			l_left = math.sqrt((goal[1]-currXY_left_world[1])**2 + (goal[0]-currXY_left_world[0])**2)
+# 		#if ( ((goal[1]-currXY_right_world[1])**2 + (goal[0]-currXY_right_world[0])**2) < l_right**2):
+# 		#	l_right = math.sqrt((goal[1]-currXY_right_world[1])**2 + (goal[0]-currXY_right_world[0])**2)
+
+# 		a.moveToXYGoal(currXY_left_world[0]+l_left*math.cos(gamma_left), currXY_left_world[1]+l_left*math.sin(gamma_left))
+# 		#b.moveToXYGoal(currXY_right_world[0]+l_right*math.cos(gamma_right), currXY_right_world[1]+l_right*math.sin(gamma_right))
+# 		a.update()
+# 		#b.update()
+		
+		
+# 	except KeyboardInterrupt:
+# 		print "Starting rotation..."
+# 		break
+
+# #activate wheel mode
+# leftElbow.ccw_angle_limit = 0
+# leftElbow.cw_angle_limit = 0
+# leftElbow.moving_speed = 20
+# net.synchronize()
+# #a.update()
+
+# time.sleep(2)
+# leftElbow.moving_speed = 1
+# #a.update()
+# net.synchronize()
+
+# #activate multiturn mode again
+# leftElbow.ccw_angle_limit = 4095
+# leftElbow.cw_angle_limit = 4095
+# net.synchronize()
 
