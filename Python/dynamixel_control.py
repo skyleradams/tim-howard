@@ -190,7 +190,7 @@ a.update()
 b.update()
 
 points = [[55,0],[50,0],[45,0],[40,0],[35,0],[30,0],[25,0],[20,0],[15,0],[10,0],[5,0]]
-goal = [14.5,50]
+goal = [60,0]
 
 t = time.time()
 
@@ -208,8 +208,8 @@ while True:
 		currXY_right_world = [currXY_right[0]+options.right_arm.horizontal_offset, currXY_right[1]+options.right_arm.vertical_offset]
 		gamma_right = math.atan2(goal[1]-currXY_right_world[1], goal[0]-currXY_right_world[0])
 
-		l_left=2
-		l_right=2
+		l_left=4
+		l_right=4
 		if( ((goal[1]-currXY_left_world[1])**2 + (goal[0]-currXY_left_world[0])**2) < l_left**2):
 			l_left = math.sqrt((goal[1]-currXY_left_world[1])**2 + (goal[0]-currXY_left_world[0])**2)
 		if ( ((goal[1]-currXY_right_world[1])**2 + (goal[0]-currXY_right_world[0])**2) < l_right**2):
@@ -225,6 +225,7 @@ while True:
 			goal = points.pop()
 			t = time.time()
 		'''
+		
 		
 	except KeyboardInterrupt:
 		break

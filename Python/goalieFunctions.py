@@ -11,21 +11,17 @@ def signal_handler(signal, frame):
     sys.exit(0)
 
 def getVals(sObj):
-	try:
-		sObj.send('s')
-		raw = sObj.recv(16)
-		x1 = struct.unpack('>H',raw[0:2])[0]
-		y1 = struct.unpack('>H',raw[2:4])[0]
-		a1 = struct.unpack('>H',raw[4:6])[0]
-		x2 = struct.unpack('>H',raw[6:8])[0]
-		y2 = struct.unpack('>H',raw[8:10])[0]
-		a2 = struct.unpack('>H',raw[10:12])[0]
-		timestamp = struct.unpack('>f',raw[12:16])[0]
-		return (x1, y1, a1, x2, y2, a2, timestamp)
-	except:
-		print "Vision server error"
-		return (0,0,0,0,0,0,0)
-	
+	sObj.send('s')
+	raw = sObj.recv(16)
+	x1 = struct.unpack('>H',raw[0:2])[0]
+	y1 = struct.unpack('>H',raw[2:4])[0]
+	a1 = struct.unpack('>H',raw[4:6])[0]
+	x2 = struct.unpack('>H',raw[6:8])[0]
+	y2 = struct.unpack('>H',raw[8:10])[0]
+	a2 = struct.unpack('>H',raw[10:12])[0]
+	timestamp = struct.unpack('>f',raw[12:16])[0]
+	return (x1, y1, a1, x2, y2, a2, timestamp)
+
 
 #### Own functions ####
 
@@ -35,8 +31,8 @@ def initKalman(initstate, initcovariance):
 	Transition_Matrix, b = transitionMatrices(deltaT_default,initstate)
 	Observation_Matrix=[[1,0,0,0,0,0],[0,1,0,0,0,0],[0,0,1,0,0,0]]
 
-	posCov = 1e-5
-	velCov = 1e-5
+	posCov = 5e-4
+	velCov = 1e-4
 	transistionCov=np.diag([posCov,posCov,posCov,velCov,velCov,velCov]) #how confident are we of our model..how about impact cases. more certain about pos than speed?
 	observationCov=0.5e-2*np.eye(3) #measure from data, may change according to blob size
 	kf=KalmanFilter(transition_matrices=Transition_Matrix,
@@ -130,8 +126,9 @@ def cameraTransform( x1, y1, a1, x2, y2, a2 ):
 	#using fit() from matlab, zball = f(z_pixels, xball, yball), but we need to make it a function of only two variables. 
 	#I propose that alpha = atan2(yball, xball), and that will be a property of the zball coordinate.
 	alpha = math.atan2(y_ball, x_ball)
-	z_ball = -19.98 + 3.423*alpha + .09715*z
+	#z_ball = -19.98 + 3.423*alpha + .09715*z
 	#z_ball = -68.96 - 26.4*alpha + .4684*z + 2.762*alpha*alpha + .0691*alpha*z - .0006249*z*z
+	z_ball = 0
 	return [x_ball, y_ball, z_ball]
 
 def packInteger(value):

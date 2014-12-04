@@ -192,16 +192,16 @@ class Arm(object):
 
 
 
-a = Arm(myActuators[0], myActuators[1], options.left_arm)
-b = Arm(myActuators[2], myActuators[3], options.right_arm)
-a.update()
-b.update()
+a_arm = Arm(myActuators[0], myActuators[1], options.left_arm)
+b_arm = Arm(myActuators[2], myActuators[3], options.right_arm)
+a_arm.update()
+b_arm.update()
 
 '''Definitions and initialization vision'''
 
 ########  Set up TCP/IP Connection #### (prewritten code for vision system)
-#serverIP = '192.168.1.212'  #Use with the 2.12 Servers
-serverIP = 'localhost'      #Use for loopback testing on your own computer
+serverIP = '192.168.1.212'  #Use with the 2.12 Servers
+#serverIP = 'localhost'      #Use for loopback testing on your own computer
 s1=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 try:
     s1.connect((serverIP,2121))
@@ -212,7 +212,7 @@ except socket.error:
 
 #### variable definitions and initialization ####
 
-pxGoalie = 0.2 #[m] Position of goalie
+pxGoalie = 0.46 #[m] Position of goalie
 deltaT_predictor = 0.1 #timestep for prediction... accuracy vs speed
 predictTimelimit = 4; #[s] Time limit to abort kalman predictor
 
@@ -272,12 +272,13 @@ loopRuntime = 0
 
 while True:
 	try:
-
 		(x1, y1, a1, x2, y2, a2, timestamp) = goalieFunctions.getVals(s1) #grab frame from camera
 		if a1 == 0:
 			continue
-		print (x1, y1, a1, x2, y2, a2, timestamp)
 		#(x1, y1, a1, x2, y2, a2, timestamp) = SavedData[loopcount]
+		camera_observation = goalieFunctions.cameraTransform( x1, y1, a1, x2, y2, a2) #transfrom to our system
+		if camera_observation[0] > 2.8 or camera_observation[0] < 0.39: #throw out measurements beyond striker point
+			continue
 
 		timestamp_current = timestamp
 		deltaT = timestamp_current-timestamp_prev
@@ -287,25 +288,14 @@ while True:
 		if deltaT == 0: #camera gave us old frame that we already have -- discard and try again
 			continue
 
-		#RawCameraData.append((x1, y1, a1, x2, y2, a2, timestamp))
-		camera_observation = goalieFunctions.cameraTransform( x1, y1, a1, x2, y2, a2) #transfrom to our system
-	
-		#pxRaw.append(camera_observation[0])
-		#pyRaw.append(camera_observation[1])
-		#pzRaw.append(camera_observation[2])
-	
 		A, b = goalieFunctions.transitionMatrices(deltaT,prev_filtered_state_mean)
 		[next_filtered_state_mean, next_filtered_state_covariance] = kf.filter_update(prev_filtered_state_mean, prev_filtered_state_covariance, observation=camera_observation, transition_matrix=A, transition_offset=b, transition_covariance=None, observation_matrix=None, observation_offset=None, observation_covariance=None)
-
-		#pxFilt.append(next_filtered_state_mean[0])
-		#pyFilt.append(next_filtered_state_mean[1])
-		#pzFilt.append(next_filtered_state_mean[2])
 
 	
 		# predicting target position on goal (may implement to execute less frequently than whole loop)
 		px = next_filtered_state_mean[0]
 		vx = next_filtered_state_mean[3]
-		if vx < 0 and px > pxGoalie: #if not, ball not heading towards goal or is behind it
+		if vx < 0 and px > pxGoalie+0.3: #if not, ball not heading towards goal or is behind it
 			predictionStep = 0
 			predictedState = next_filtered_state_mean
 			predictedCovariance = next_filtered_state_covariance
@@ -326,8 +316,8 @@ while True:
 
 				goal = [y_goalcoords_in, z_goalcoords_in]
 				print "moving to"+str(goal)
-				(theta1_left, theta2_left) = a.returnCurrentPositions()
-				(theta1_right, theta2_right) = b.returnCurrentPositions()
+				(theta1_left, theta2_left) = a_arm.returnCurrentPositions()
+				(theta1_right, theta2_right) = b_arm.returnCurrentPositions()
 
 				currXY_left = forwardKinematics(theta1_left, theta2_left, options.left_arm.l1, options.left_arm.l2) #in robot coords
 				currXY_left_world = [currXY_left[0]+options.left_arm.horizontal_offset, currXY_left[1]+options.left_arm.vertical_offset]
@@ -336,17 +326,19 @@ while True:
 				currXY_right_world = [currXY_right[0]+options.right_arm.horizontal_offset, currXY_right[1]+options.right_arm.vertical_offset]
 				gamma_right = math.atan2(goal[1]-currXY_right_world[1], goal[0]-currXY_right_world[0])
 
-				l_left=2
-				l_right=2
+				l_left=4
+				l_right=4
 				if( ((goal[1]-currXY_left_world[1])**2 + (goal[0]-currXY_left_world[0])**2) < l_left**2):
 					l_left = math.sqrt((goal[1]-currXY_left_world[1])**2 + (goal[0]-currXY_left_world[0])**2)
 				if ( ((goal[1]-currXY_right_world[1])**2 + (goal[0]-currXY_right_world[0])**2) < l_right**2):
 					l_right = math.sqrt((goal[1]-currXY_right_world[1])**2 + (goal[0]-currXY_right_world[0])**2)
 
-				a.moveToXYGoal(currXY_left_world[0]+l_left*math.cos(gamma_left), currXY_left_world[1]+l_left*math.sin(gamma_left))
-				b.moveToXYGoal(currXY_right_world[0]+l_right*math.cos(gamma_right), currXY_right_world[1]+l_right*math.sin(gamma_right))
-				a.update()
-				b.update()
+				a_arm.moveToXYGoal(currXY_left_world[0]+l_left*math.cos(gamma_left), currXY_left_world[1]+l_left*math.sin(gamma_left))
+				b_arm.moveToXYGoal(currXY_right_world[0]+l_right*math.cos(gamma_right), currXY_right_world[1]+l_right*math.sin(gamma_right))
+
+				a_arm.update()
+				b_arm.update()
+				
 
 
 		#start live plotting:
@@ -364,7 +356,6 @@ while True:
 	
 		loopcount += 1
 		loopRuntime += deltaT
-		#timevec.append(loopRuntime)
 
 	except KeyboardInterrupt:
 		break
